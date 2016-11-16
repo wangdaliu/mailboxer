@@ -105,6 +105,16 @@ describe Mailboxer::Notification do
     expect(notification.body).to eq "Body"
   end
 
+  it "should not escape the HTML body" do
+    @entity1.notify("Subject", "<strong>Hello</strong>>_<")
+    @entity1.mailbox.receipts.size.should==1
+    receipt      = @entity1.mailbox.receipts.first
+    notification = receipt.notification
+    notification.subject.should=="Subject"
+    # Note: if we not unescapeHTML, the body will be <strong>Hello</strong>>_&lt;
+    notification.body.should=="<strong>Hello</strong>>_<"
+  end
+
   it "should be able to specify a sender for a notification" do
     Mailboxer::Notification.notify_all(@entity1,"Subject","Body", nil, true, nil, false, @entity3)
 
